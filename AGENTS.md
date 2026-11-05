@@ -69,9 +69,8 @@ python -m venv .venv
   name, e.g. `wk0_Summe`.
 - `[M]` is the taxpayer and `[F]` is the spouse. Example card: `EA[M]\WK0000` (Werbungskosten).
 - Changes only apply on **OK**.
-- The driver reuses an open WISO window whose title matches the case **file name**. A same-named case
-  from another folder is not detected. Make sure only the intended case is open. A fix that checks
-  the full path is welcome.
+- The window title only shows the case **file name**. `open_case` therefore checks the full path
+  (`opened_path()`: WISO's command line, else `btsdatei.xml`) before reusing an open window. Keep that check.
 - Qt combo boxes **can't** be set in the background. Report them as human steps instead of working
   around them with global input.
 

@@ -9,6 +9,7 @@ Mechanics (see docs/uia-findings.md):
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import time
@@ -86,6 +87,7 @@ class WisoWindow(Protocol):
     def screenshot(self, path: str) -> None: ...
     def tree_rect(self) -> Rect | None: ...
     def capture(self) -> Any: ...
+    def opened_path(self) -> Path | None: ...
 
 
 def format_amount(amount: Decimal) -> str:
@@ -142,6 +144,19 @@ def _same_cell(shown: str, value: str) -> bool:
     return a is not None and a == b
 
 
+_CASE_ARG = re.compile(r'"([^"]+\.steuer\d{4})"|(\S+\.steuer\d{4})', re.IGNORECASE)
+
+
+def case_from_cmdline(cmd: str | None) -> Path | None:
+    """The case file WISO was started with (last ``*.steuerNNNN`` argument), or None."""
+    hits = _CASE_ARG.findall(cmd or "")
+    return Path(hits[-1][0] or hits[-1][1]) if hits else None
+
+
+def _same_file(a: Path, b: Path) -> bool:
+    return os.path.normcase(os.path.abspath(a)) == os.path.normcase(os.path.abspath(b))
+
+
 def _mid_y(r: Rect) -> int:
     return (r[1] + r[3]) // 2
 
@@ -155,8 +170,10 @@ class WisoDriver:
         sleep: Callable[[float], None] = time.sleep,
         timeout: float = 120.0,
         settle: float = 1.5,
+        known_cases: Callable[[], list[Path]] | None = None,
     ) -> None:
         self._attach = attach
+        self._known_cases: Callable[[], list[Path]] = known_cases or (lambda: [])
         self._launch = launch
         self.guard = guard
         self._sleep = sleep
@@ -197,11 +214,14 @@ class WisoDriver:
     def open_case(self, path: Path) -> None:
         path = Path(path)
         self.guard.check_case(path)
+        self.current_case = None
         prefix = f"{path.stem} - WISO Steuer"
         w = self._attach()
         if w is not None and " - WISO Steuer" in w.title() and not w.title().startswith(prefix):
             raise DriverError(f"another case is open in WISO: {w.title()!r} - close it first")
-        if w is None or not w.title().startswith(prefix):
+        if w is not None and w.title().startswith(prefix):
+            self._check_same_file(w, path)
+        else:
             self._launch(path)
 
             def ready() -> bool:
@@ -211,6 +231,22 @@ class WisoDriver:
             self._wait(ready, f"WISO window {prefix!r}")
         self.current_case = path
         self.dismiss_blockers()
+
+    def _check_same_file(self, w: WisoWindow, path: Path) -> None:
+        """The window title only shows the file name: make sure WISO has *this* file open."""
+        opened = w.opened_path()
+        if opened is not None:
+            if not _same_file(opened, path):
+                raise DriverError(f"WISO has {opened} open (same file name as {path}) - close it first")
+            return
+        others = [p for p in self._known_cases() if p.name.lower() == path.name.lower()]
+        others = [p for p in others if not _same_file(p, path)]
+        if others:
+            raise DriverError(
+                f"cannot verify which file WISO has open: other cases with the same file name exist "
+                f"({', '.join(map(str, others))}). Close WISO and call open_case again, or give the "
+                "working copy a unique name"
+            )
 
     def dismiss_blockers(self) -> list[str]:
         w = self._win()
@@ -736,6 +772,26 @@ class PywinautoWindow:  # pragma: no cover - exercised by real-life tests (-m wi
 
     def title(self) -> str:
         return str(self.w.window_text())
+
+    def opened_path(self) -> Path | None:
+        """Case file from the WISO process's command line (None if WISO was started without one)."""
+        try:
+            pid = int(self.w.process_id())
+            out = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    f"(Get-CimInstance Win32_Process -Filter 'ProcessId={pid}').CommandLine",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            ).stdout
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
+        return case_from_cmdline(out.strip())
 
     @staticmethod
     def _value_of(el: Any) -> Callable[[], str | None]:

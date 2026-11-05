@@ -103,9 +103,16 @@ class ServerContext:
             from .ui.driver import attach_real, launcher
 
             attach, launch = attach or attach_real, launch or launcher(paths.exe)
-        driver = (
-            WisoDriver(attach, launch, guard, sleep=sleep) if sleep else WisoDriver(attach, launch, guard)
-        )
+
+        def known_cases() -> list[Path]:
+            try:
+                return [c.path for c in load_cases(paths.recent_files)]
+            except CaseFileError:
+                return []
+
+        driver = WisoDriver(attach, launch, guard, known_cases=known_cases)
+        if sleep:
+            driver._sleep = sleep
         return cls(
             paths=paths,
             catalog=catalog,

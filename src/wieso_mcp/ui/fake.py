@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from .driver import Ctl, MessageBox, Rect, TableCtl
@@ -60,6 +61,7 @@ class FakeTable:
 class FakeWindow:
     def __init__(self, title: str = "probe - WISO Steuer 2026") -> None:
         self._title = title
+        self.opened: Path | None = None  # full path of the open case (None: unknown)
         self.ctls: list[Ctl] = []
         self.table: FakeTable | None = None
         self.box: MessageBox | None = None
@@ -119,6 +121,9 @@ class FakeWindow:
     # --- WisoWindow protocol ----------------------------------------------
     def title(self) -> str:
         return self._title
+
+    def opened_path(self) -> Path | None:
+        return self.opened
 
     def controls(self) -> list[Ctl]:
         return list(self.ctls)

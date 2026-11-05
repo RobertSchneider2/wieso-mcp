@@ -48,6 +48,9 @@ Typischer Ablauf: `list_cases` → `prepare_working_copy` → `open_case(Kopie)`
 - **Läuft im Hintergrund.** Es nutzt nur UI Automation und Nachrichten an WISOs eigenes Fenster.
   Keine globalen Tastendrücke, keine Mausbewegungen. Du kannst nebenher weiterarbeiten.
 - **Protokoll.** Jede Eingabe wird in `audit.jsonl` festgehalten (`WIESO_MCP_AUDIT_DIR`).
+- **Richtige Datei, nicht nur richtiger Name.** Bevor ein offenes WISO-Fenster weiterverwendet wird, wird
+  der volle Pfad des offenen Falls mit dem gewünschten verglichen (aus WISOs Startbefehl, sonst aus der
+  Liste der zuletzt geöffneten Dateien). Ein gleichnamiger Fall aus einem anderen Ordner wird abgelehnt.
 
 ## Was (noch) nicht geht
 
@@ -76,9 +79,6 @@ darauf verlässt, solltest du wissen, was es noch nicht kann:
 - **Nur eine WISO-Version getestet.** Jede neue WISO-Version kann Dialognamen oder das Layout ändern.
   Nach jedem Update die Praxistests (`pytest -m wiso`) laufen lassen, siehe
   [`docs/jahresablauf.md`](docs/jahresablauf.md).
-- **Hängt sich über den Dateinamen an ein offenes WISO-Fenster.** Ist schon ein WISO-Fenster mit
-  einem Fall *gleichen Dateinamens* offen, wird es weiterverwendet, auch wenn es eine andere Datei in
-  einem anderen Ordner ist. Vorher andere WISO-Fenster schließen und Arbeitskopien eindeutig benennen.
 - **Nur Windows, nur deutsche Oberfläche.** Es braucht WISO Steuer als Desktop-Programm, nicht die
   Web-Version.
 - **Fester Bank-Export.** `summarize_bank_export` erwartet ein bestimmtes, geprüftes CSV (siehe

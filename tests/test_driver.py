@@ -656,3 +656,46 @@ def test_set_radio_with_person_suffix_in_group(env):
     win.add("RadioButton", "Ja", DLG + "te10a_hatAnschlussGenutzt.Frau.te10a_hatAnschlussGenutzt.Frau")
     drv.set_radio("te10a_hatAnschlussGenutzt.Mann", "Ja")
     assert win.selected == {DLG + gid: "Ja"}
+
+
+# ---------------------------------------------------------------- same file name, other folder
+def test_open_case_refuses_same_name_window_with_other_path(env, tmp_path):
+    drv, win, guard, case, *_ = env
+    other = tmp_path / "elsewhere" / case.name
+    win.opened = other  # WISO shows "probe - WISO Steuer 2026" but has a different file open
+    with pytest.raises(DriverError, match="elsewhere"):
+        drv.open_case(case)
+    assert drv.current_case is None
+
+
+def test_open_case_accepts_same_name_window_with_same_path(env):
+    drv, win, guard, case, launched, *_ = env
+    win.opened = case
+    drv.open_case(case)
+    assert drv.current_case == case and launched == []
+
+
+def test_open_case_refuses_unverifiable_window_when_name_is_ambiguous(env, tmp_path):
+    drv, win, guard, case, *_ = env
+    win.opened = None  # e.g. opened through WISO's own menu: path unknown
+    drv._known_cases = lambda: [case, tmp_path / "old" / case.name]
+    with pytest.raises(DriverError, match="same file name"):
+        drv.open_case(case)
+
+
+def test_open_case_accepts_unverifiable_window_when_name_is_unique(env, tmp_path):
+    drv, win, guard, case, *_ = env
+    win.opened = None
+    drv._known_cases = lambda: [case, tmp_path / "other.steuer2025"]
+    drv.open_case(case)
+    assert drv.current_case == case
+
+
+def test_case_path_from_command_line():
+    from wieso_mcp.ui.driver import case_from_cmdline
+
+    cmd = r'"C:\Program Files\WISO\Steuersoftware 2026\wiso2026.exe" "G:\a b\probe.steuer2025"'
+    assert case_from_cmdline(cmd) == Path(r"G:\a b\probe.steuer2025")
+    assert case_from_cmdline(r"C:\x\wiso2026.exe G:\c\x.steuer2025") == Path(r"G:\c\x.steuer2025")
+    assert case_from_cmdline(r'"C:\x\wiso2026.exe"') is None
+    assert case_from_cmdline(None) is None

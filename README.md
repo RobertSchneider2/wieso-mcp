@@ -44,6 +44,9 @@ Typical flow: `list_cases` → `prepare_working_copy` → `open_case(copy)` → 
 - **Background operation.** Only UI Automation patterns and messages posted to WISO's own window are
   used. There are no global keystrokes and no mouse moves, so you can keep working in other windows.
 - **Audit log.** Every write is appended to `audit.jsonl` (`WIESO_MCP_AUDIT_DIR`).
+- **Right file, not just the right name.** Before reusing an open WISO window, the full path of its case
+  is checked against the requested one (WISO's command line, else the recent-files list). A same-named
+  case from another folder is refused.
 
 ## Known limitations
 
@@ -68,9 +71,6 @@ know what it can't do yet:
   the XML afterwards.
 - **One WISO version tested.** Every yearly WISO release can change dialog names or the layout. Run the
   real-life tests (`pytest -m wiso`) after each update. See [`docs/jahresablauf.md`](docs/jahresablauf.md).
-- **Attaches to an open WISO window by file name.** If a WISO window with a case of the *same file
-  name* is already open, the driver reuses it, even when it is a different file in another folder.
-  Close other WISO windows before working, and give working copies unique names.
 - **Windows only, German UI only.** It needs WISO Steuer as the desktop app, not the web version.
 - **Bank export format.** `summarize_bank_export` expects a specific reviewed CSV (see below). Getting
   your bank data into that shape is up to you.
