@@ -55,8 +55,9 @@ know what it can't do yet:
 
 - **Dropdowns (Qt combo boxes) can't be set.** WISO's combo boxes and combo cells in tables, such as
   *Art der Dienstleistung*, *Gezahlt von* or the person selector, ignore UI Automation and posted
-  messages while WISO is in the background. The agent reports these as **human steps**: which page,
-  which field, which value. You click them yourself.
+  messages while WISO is in the background. A write that WISO rejects is reported as an error, never as
+  success. There is no automatic hand-over list yet: have your agent collect these fields (page, field,
+  value) and click them yourself.
 - **Only one complete entry recipe.** `mapping.yaml` has a verified UI recipe only for *Werbungskosten →
   Arbeitsmittel*. Other categories need the low-level UI tools (`open_card`, `set_field`,
   `add_table_rows`, …). Once a path works, it can be added to the mapping.

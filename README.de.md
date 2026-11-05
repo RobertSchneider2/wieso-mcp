@@ -59,8 +59,9 @@ darauf verlässt, solltest du wissen, was es noch nicht kann:
 
 - **Dropdowns lassen sich nicht setzen.** WISOs Auswahllisten (Qt-Comboboxen) und Auswahlzellen in
   Tabellen, etwa *Art der Dienstleistung*, *Gezahlt von* oder die Personenauswahl, reagieren im
-  Hintergrund weder auf UI Automation noch auf Fensternachrichten. Der Agent meldet sie als
-  **Handgriff für dich**: welche Seite, welches Feld, welcher Wert. Diese Felder klickst du selbst.
+  Hintergrund weder auf UI Automation noch auf Fensternachrichten. Lehnt WISO einen Wert ab, wird
+  das als Fehler gemeldet, nie als Erfolg. Eine automatische Liste für dich gibt es noch nicht: Lass
+  deinen Agenten diese Felder sammeln (Seite, Feld, Wert) und klick sie selbst.
 - **Nur ein komplettes Eingabe-Rezept.** In `mapping.yaml` ist bisher nur *Werbungskosten →
   Arbeitsmittel* fertig und geprüft. Andere Bereiche gehen mit den einfachen UI-Tools (`open_card`,
   `set_field`, `add_table_rows`, …). Funktionierende Wege können danach ins Mapping aufgenommen
