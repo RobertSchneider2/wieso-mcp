@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Elster xmlns="http://www.elster.de/elsterxml/schema/v11">
+  <TransferHeader version="11"><Verfahren>ElsterErklaerung</Verfahren><DatenArt>ESt</DatenArt></TransferHeader>
+  <DatenTeil>
+    <Nutzdatenblock>
+      <NutzdatenHeader version="11"><NutzdatenTicket>1</NutzdatenTicket></NutzdatenHeader>
+      <Nutzdaten>
+        <E10 xmlns="http://finkonsens.de/elster/elstererklaerung/est/e10/v2025" version="2025">
+          <ESt1A>
+            <Art_Erkl><E0100001>X</E0100001></Art_Erkl>
+            <Allg><A><E0100201>Mustermann</E0100201><E0100301>Max</E0100301></A></Allg>
+          </ESt1A>
+          <AgB>
+            <And_Aufw><Krankh>
+              <Einz><E0161301>Brille</E0161301><E0161302>350</E0161302></Einz>
+              <Einz><E0161301>Zahnarzt</E0161301><E0161302>1200</E0161302></Einz>
+              <Sum><E0161304>1550</E0161304></Sum>
+            </Krankh></And_Aufw>
+          </AgB>
+        </E10>
+      </Nutzdaten>
+    </Nutzdatenblock>
+  </DatenTeil>
+</Elster>

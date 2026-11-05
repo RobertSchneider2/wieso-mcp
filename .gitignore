@@ -1,0 +1,18 @@
+# Autopilot workflow state
+.autopilot/
+.venv/
+__pycache__/
+*.egg-info/
+.coverage
+coverage.json
+# never commit tax data
+*.steuer20*
+*.frei20*
+fixtures/private/
+audit/
+
+# local scratch data
+temp/
+
+# private tax data per year (python -m wieso_mcp.yearfolder <year>)
+steuer/

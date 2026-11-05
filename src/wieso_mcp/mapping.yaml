@@ -1,0 +1,87 @@
+# Bank-export category (Kategorie) + Label  ->  WISO target.
+# fields: ELSTER field IDs (VZ 2025) used to VERIFY entries in the request XML after 'Prüfen'.
+#   label/amount = itemised row fields, sum = summary field. Empty fields = cannot be verified by XML.
+# person: stpfl | ehepartner | kind | ask      entry_mode: itemised | sum
+targets:
+  - category: Werbungskosten
+    label: Arbeitsmittel
+    form: N
+    dialog_search_term: Arbeitsmittel
+    person: ask
+    entry_mode: itemised
+    fields: {label: E0204401, amount: E0204402, sum: E0204403}
+    # verified 2026-11-01 (real-life test): Verbrauchs- und Büromaterial table
+    ui:
+      section: Arbeitnehmer
+      card: 'EA[{P}]\WK0000'
+      rows: [wk0_AbschreibugenArbeitsmittel, am1_Arbeitsmaterialien]
+    notes: Standard-Ziel ist die Tabelle Verbrauchs-/Büromaterial. Geräte (z. B. Monitor, Laptop) gehören in "Beruflich genutzte Geräte" - dort ggf. manuell (Abschreibung).
+  - category: Werbungskosten
+    label: Berufsverbände
+    form: N
+    dialog_search_term: Berufsverbände
+    person: ask
+    entry_mode: itemised
+    fields: {label: E0204001, amount: E0204003, sum: E0204002}
+  - category: Werbungskosten
+    label: Fortbildung
+    form: N
+    dialog_search_term: Fortbildungskosten
+    person: ask
+    entry_mode: itemised
+    fields: {label: E0204804, amount: E0204808, sum: E0204812}
+  - category: Werbungskosten
+    label: Homeoffice/Internet
+    form: N
+    dialog_search_term: Telefonkosten
+    person: ask
+    entry_mode: itemised
+    fields: {label: E0205405, amount: E0205406, sum: E0204803}
+    notes: Telefon/Internet nur beruflicher Anteil (pauschal 20 %, max. 20 EUR/Monat). Homeoffice-Pauschale ist tagesbasiert, nicht betragsbasiert.
+  - category: Werbungskosten
+    label: Fahrtkosten
+    form: N
+    dialog_search_term: Reisekosten
+    person: ask
+    entry_mode: itemised
+    fields: {label: E0205405, amount: E0205406, sum: E0204803}
+    notes: Wege Wohnung-Arbeit werden über Entfernung und Arbeitstage erfasst, nicht über Bankbeträge.
+  - category: Sonderausgaben
+    label: Versicherung
+    form: VOR
+    dialog_search_term: Versicherungen
+    person: ask
+    entry_mode: sum
+    fields: {}
+    notes: Kranken-/Renten-/Pflegeversicherung meist per Datenabruf (VaSt) vorhanden - nicht doppelt erfassen.
+  - category: Sonderausgaben
+    label: Kinderbetreuung
+    form: Kind
+    dialog_search_term: Kinderbetreuungskosten
+    person: kind
+    entry_mode: sum
+    fields: {sum: E0506105}
+    notes: Nur unbare Zahlungen; Verpflegungsanteile herausrechnen.
+  - category: Sonderausgaben
+    label: Spenden
+    form: SA
+    dialog_search_term: Spenden
+    person: stpfl
+    entry_mode: sum
+    fields: {sum: E0108105}
+  - category: Haushaltsnahe Dienstleistungen
+    label: Handwerker
+    form: HA_35a
+    dialog_search_term: Handwerkerleistungen
+    person: stpfl
+    entry_mode: itemised
+    fields: {label: E0111217, amount: E0170601, labour: E0111214, sum: E0111215}
+    notes: Steuerlich zählt nur der Lohnanteil laut Rechnung - muss je Rechnung ergänzt werden.
+  - category: Haushaltsnahe Dienstleistungen
+    label: Nebenkosten
+    form: HA_35a
+    dialog_search_term: Nebenkosten
+    person: stpfl
+    entry_mode: itemised
+    fields: {}
+    notes: Werte aus der Nebenkosten-/Hausgeldabrechnung, nicht aus Bankbuchungen.

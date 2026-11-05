@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<btsDateiXml>
+   <ProgramVersion>20263640</ProgramVersion>
+   <btsDateiXmlEntry>
+      <btsDateiXmlDateiUuid><![CDATA[]]></btsDateiXmlDateiUuid>
+      <filepath><![CDATA[Q:/Users/Test/Steuer 2026 für 2025/Mustermann.steuer2025]]></filepath>
+      <filename><![CDATA[Mustermann.steuer2025]]></filename>
+      <steuerjahr><![CDATA[2025]]></steuerjahr>
+      <person><![CDATA[Max Mustermann und Erika Mustermann]]></person>
+      <lastopened><![CDATA[So. Feb. 8 20:43:50 2026]]></lastopened>
+      <abgabeart><![CDATA[Noch nicht abgegeben]]></abgabeart>
+      <programmmode>1</programmmode>
+      <unsavedfile>false</unsavedfile>
+   </btsDateiXmlEntry>
+   <btsDateiXmlEntry>
+      <filepath><![CDATA[Q:/Users/Test/Steuer 2026 für 2025/Mustermann - Lohnsteuer-Ermäßigung 2026.frei2026]]></filepath>
+      <filename><![CDATA[Mustermann - Lohnsteuer-Ermäßigung 2026.frei2026]]></filename>
+      <steuerjahr><![CDATA[2026]]></steuerjahr>
+      <person><![CDATA[Max Mustermann]]></person>
+      <lastopened><![CDATA[]]></lastopened>
+      <abgabeart><![CDATA[Noch nicht abgegeben]]></abgabeart>
+      <programmmode>2</programmmode>
+   </btsDateiXmlEntry>
+<btsUebernommeneDateien>
+    <uebernommen>
+        <hashvalue><![CDATA[abc]]></hashvalue>
+        <filepath><![CDATA[Q:\Users\Test\Steuer 2024\Mustermann.steuer2024]]></filepath>
+    </uebernommen>
+</btsUebernommeneDateien></btsDateiXml>

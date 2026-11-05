@@ -1,0 +1,9 @@
+﻿ID;Datum;Empfänger;Verwendungszweck;Betrag;Kategorie;Prüfstatus;Relevanz;Entscheidungsquelle;Notiz;Label;Quelle;Konto;Im Jahr 2025;Für Abschluss bestätigt
+1;2025-02-03;IT-Verband;Beitrag Feb;-25.00;Werbungskosten;confirmed;1;manual;;Berufsverbände;giro.csv;DE00;1;1
+2;2025-03-03;IT-Verband;Beitrag Mrz;-25.00;Werbungskosten;confirmed;1;manual;;Berufsverbände;giro.csv;DE00;1;1
+3;2025-04-10;Amazon;Monitor;-199,99;Werbungskosten;confirmed;1;manual;;Arbeitsmittel;giro.csv;DE00;1;1
+4;2025-04-20;Amazon;Erstattung Monitor;20.00;Werbungskosten;confirmed;1;manual;;Arbeitsmittel;giro.csv;DE00;1;1
+5;2025-05-01;Kita Sonnenschein;Beitrag Mai;-180.00;Sonderausgaben;confirmed;1;manual;;Kinderbetreuung;giro.csv;DE00;1;1
+6;2024-12-30;Kita Sonnenschein;Beitrag Dez;-180.00;Sonderausgaben;confirmed;1;manual;;Kinderbetreuung;giro.csv;DE00;0;0
+7;2025-06-01;Handwerker GmbH;Rechnung;-1.234,56;Haushaltsnahe Dienstleistungen;pending;1;ai;;;giro.csv;DE00;1;0
+8;2025-07-01;Spendenorg;Spende;-50.00;Sonderausgaben;confirmed;1;manual;;;giro.csv;DE00;1;1
