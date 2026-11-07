@@ -53,11 +53,13 @@ Typical flow: `list_cases` → `prepare_working_copy` → `open_case(copy)` → 
 This is a working tool for one household's return, not a finished product. Before you rely on it,
 know what it can't do yet:
 
-- **Dropdowns (Qt combo boxes) can't be set.** WISO's combo boxes and combo cells in tables, such as
-  *Art der Dienstleistung*, *Gezahlt von* or the person selector, ignore UI Automation and posted
-  messages while WISO is in the background. A write that WISO rejects is reported as an error, never as
-  success. There is no automatic hand-over list yet: have your agent collect these fields (page, field,
-  value) and click them yourself.
+- **Dropdowns: dialog combos work, combo cells in tables don't.** `set_combo` expands the list and
+  walks it with the arrow keys, then verifies the result by reading the field back — that works for
+  combo boxes in dialogs such as *Familienstand*, *Geschlecht* or *Religion* (verified against WISO
+  Steuer 2027). Combo cells inside amount tables (e.g. *Art der Dienstleistung*, *Gezahlt von*) are
+  still unsupported. A write that WISO rejects is reported as an error, never as success. There is no
+  automatic hand-over list yet: have your agent collect the remaining fields (page, field, value) and
+  click them yourself.
 - **Only one complete entry recipe.** `mapping.yaml` has a verified UI recipe only for *Werbungskosten →
   Arbeitsmittel*. Other categories need the low-level UI tools (`open_card`, `set_field`,
   `add_table_rows`, …). Once a path works, it can be added to the mapping.

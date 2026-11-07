@@ -1006,6 +1006,7 @@ class PywinautoWindow:  # pragma: no cover - exercised by real-life tests (-m wi
 
     def tables(self) -> list[TableCtl]:
         from pywinauto.uia_defines import IUIA
+
         uia = IUIA().UIA_dll
         out = []
         for t in self.w.descendants(control_type="Table"):
