@@ -16,3 +16,4 @@ temp/
 
 # private tax data per year (python -m wieso_mcp.yearfolder <year>)
 steuer/
+.venv-linux/
