@@ -88,6 +88,8 @@ class WisoWindow(Protocol):
     def tree_rect(self) -> Rect | None: ...
     def capture(self) -> Any: ...
     def opened_path(self) -> Path | None: ...
+    def combo_options(self, automation_id: str) -> list[str]: ...
+    def combo_select(self, automation_id: str, option: str) -> None: ...
 
 
 def format_amount(amount: Decimal) -> str:
@@ -390,6 +392,37 @@ class WisoDriver:
         if now != value and not same_number:
             raise DriverError(f"verify failed for {var}: wrote {value!r}, read {now!r}")
         return {"var": var, "old": old, "new": value}
+
+    def set_combo(self, var: str, option: str) -> dict[str, Any]:
+        """Pick one entry of a dropdown (Qt combo box), verified by read-back.
+
+        WISO's combos ignore the UIA Value pattern, and SelectionItem on their list items
+        reports success without committing. They do honour ExpandCollapse + keyboard, so the
+        window adapter expands the popup and walks to the wanted entry with arrow keys.
+        """
+        ctl = self._field(var)
+        if ctl.kind != "ComboBox":
+            raise DriverError(f"{var} is not a dropdown (kind: {ctl.kind})")
+        self.guard.check_set(ctl.name, ctl.automation_id)
+        if not ctl.enabled:
+            raise DriverError(f"{var} is read-only")
+        self._before_write()
+        old = ctl.value()
+        win = self._win()
+        options = win.combo_options(ctl.automation_id)
+        hit = _match_option(option, options)
+        if hit is None:
+            raise DriverError(f"{var} has no option {option!r} (options: {options})")
+        win.combo_select(ctl.automation_id, hit)
+        now: str | None = None
+        for _ in range(6):  # WISO re-renders the dialog block after a combo change
+            self._sleep(self.settle)
+            now = self._field(var).value()
+            if (now or "").strip() == hit.strip():
+                break
+        if (now or "").strip() != hit.strip():
+            raise DriverError(f"verify failed for {var}: selected {hit!r}, read {now!r}")
+        return {"var": var, "old": old, "selected": hit}
 
     # ---------------------------------------------------------------- tables
     def _table(self) -> TableCtl:
@@ -757,6 +790,23 @@ def _radio_group(var: str) -> str:
     return parts[0]
 
 
+def _match_option(option: str, options: list[str]) -> str | None:
+    """Fuzzy-pick one entry of a dropdown: exact (case-insensitive), then prefix, then substring."""
+    want = option.strip().lower()
+    if not want:
+        return None
+    for o in options:
+        if o.strip().lower() == want:
+            return o
+    for o in options:
+        if o.strip().lower().startswith(want):
+            return o
+    for o in options:
+        if want in o.strip().lower():
+            return o
+    return None
+
+
 def _is_wiso_table(automation_id: str, class_name: str) -> bool:
     """WISO grids are rsTableView widgets: usually the id suffix, sometimes (te12_...) only the class."""
     return automation_id.endswith("rsTableView") or class_name == "rsTableView"
@@ -894,9 +944,68 @@ class PywinautoWindow:  # pragma: no cover - exercised by real-life tests (-m wi
 
         return select
 
+    def _combo(self, automation_id: str) -> Any:
+        for c in self.w.descendants(control_type="ComboBox"):
+            if (c.element_info.automation_id or "") == automation_id:
+                return c
+        raise DriverError(f"combo {automation_id!r} not found in the current window")
+
+    @staticmethod
+    def _combo_popup() -> Rect:
+        """The dropdown list is its own top-level window (Qt), not a child of the dialog."""
+        from pywinauto import Desktop
+
+        for w in Desktop(backend="uia").windows(class_name="QComboBoxPrivateContainer"):
+            r = w.rectangle()
+            return (r.left, r.top, r.right, r.bottom)
+        raise DriverError("dropdown did not open (no QComboBoxPrivateContainer)")
+
+    def _combo_items(self, popup: Rect) -> list[Any]:
+        """Entry elements: they hang off the main window, so filter them by the popup's vertical span."""
+        return [
+            it
+            for it in self.w.descendants(control_type="ListItem")
+            if popup[1] <= it.rectangle().top <= popup[3]
+        ]
+
+    def combo_options(self, automation_id: str) -> list[str]:
+        """Expand the dropdown, read its entries, close it again."""
+        el = self._combo(automation_id)
+        el.expand()
+        time.sleep(0.6)
+        try:
+            return [it.window_text() for it in self._combo_items(self._combo_popup())]
+        finally:
+            try:
+                el.collapse()
+            except Exception:  # noqa: BLE001 - closing is best effort
+                pass
+
+    def combo_select(self, automation_id: str, option: str) -> None:
+        """Walk the open dropdown with arrow keys; WISO commits on ENTER."""
+        from pywinauto.keyboard import send_keys
+
+        el = self._combo(automation_id)
+        el.expand()
+        time.sleep(0.6)
+        items = [it.window_text() for it in self._combo_items(self._combo_popup())]
+        try:
+            current = str(el.iface_value.CurrentValue)
+        except Exception:  # noqa: BLE001 - unreadable means "start at the top"
+            current = ""
+        start = items.index(current) if current in items else 0
+        target = items.index(option) if option in items else start
+        el.set_focus()
+        time.sleep(0.2)
+        key = "{DOWN}" if target >= start else "{UP}"
+        for _ in range(abs(target - start)):
+            send_keys(key)
+            time.sleep(0.1)
+        send_keys("{ENTER}")
+        time.sleep(0.8)
+
     def tables(self) -> list[TableCtl]:
         from pywinauto.uia_defines import IUIA
-
         uia = IUIA().UIA_dll
         out = []
         for t in self.w.descendants(control_type="Table"):

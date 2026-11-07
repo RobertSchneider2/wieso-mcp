@@ -343,6 +343,20 @@ def build_server(ctx: ServerContext) -> MCPServer:
         return res
 
     @tool
+    def set_combo(var: str, option: str) -> dict[str, str]:
+        """Pick one entry of a dropdown, e.g. set_combo('aa1_Geschlecht', 'Männlich').
+
+        WISO's Qt combo boxes ignore the UIA Value pattern and report success for
+        SelectionItem without committing. This tool expands the list and walks to the
+        entry with the arrow keys, then verifies the result by reading the field back.
+        `option` is matched case-insensitively; a prefix or substring is accepted as long
+        as it is unambiguous (exact match wins over prefix, prefix over substring).
+        """
+        res = ui(lambda: drv.set_combo(var, option))
+        ctx.audit.write("set_combo", case=str(drv.current_case), **res)
+        return res
+
+    @tool
     def toggle_checkbox(var: str, checked: bool) -> dict[str, Any]:
         """Set a checkbox of the open dialog to checked/unchecked (idempotent, verified, audited)."""
         res = ui(lambda: drv.toggle_checkbox(var, checked))

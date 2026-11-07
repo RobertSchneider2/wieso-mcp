@@ -58,6 +58,16 @@ class FakeTable:
             self.rows.append(self._empty_row())
 
 
+@dataclass
+class FakeCombo:
+    """Qt-style dropdown: the value only changes when the list entry is really picked."""
+
+    options: list[str]
+    current: str
+    open: bool = False
+    reject: bool = False  # the Value-pattern behaviour: reports success, commits nothing
+
+
 class FakeWindow:
     def __init__(self, title: str = "probe - WISO Steuer 2026") -> None:
         self._title = title
@@ -73,6 +83,8 @@ class FakeWindow:
         self.table_visible = True  # False once a dialog with the table was confirmed
         self.selected: dict[str, str] = {}
         self.checked: dict[str, bool] = {}
+        self.combos: dict[str, FakeCombo] = {}
+        self.combo_picks: list[tuple[str, str]] = []
         self.tree: Rect | None = None
         self.image: Any = None
         self.foreground = False
@@ -119,6 +131,41 @@ class FakeWindow:
         return ctl
 
     # --- WisoWindow protocol ----------------------------------------------
+    def add_combo(
+        self,
+        name: str,
+        auto_id: str,
+        options: list[str],
+        current: str | None = None,
+        reject: bool = False,
+    ) -> Ctl:
+        combo = FakeCombo(list(options), current if current is not None else options[0], reject=reject)
+        self.combos[auto_id] = combo
+        ctl = Ctl(
+            "ComboBox",
+            name,
+            auto_id,
+            lambda a=auto_id: self.combos[a].current,
+            True,
+            (0, 0, 10, 10),
+            lambda: None,
+            lambda _v: None,
+        )
+        self.ctls.append(ctl)
+        return ctl
+
+    def combo_options(self, automation_id: str) -> list[str]:
+        combo = self.combos[automation_id]
+        combo.open = True
+        return list(combo.options)
+
+    def combo_select(self, automation_id: str, option: str) -> None:
+        combo = self.combos[automation_id]
+        self.combo_picks.append((automation_id, option))
+        if not combo.reject and option in combo.options:
+            combo.current = option
+        combo.open = False
+
     def title(self) -> str:
         return self._title
 
